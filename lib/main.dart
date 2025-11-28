@@ -80,7 +80,7 @@ class WeatherWiseApp extends ConsumerWidget {
       ),
       navigationBarTheme: NavigationBarThemeData(
         indicatorColor: Colors.blue.shade100,
-        labelTextStyle: MaterialStateProperty.all(
+        labelTextStyle: WidgetStateProperty.all(
           const TextStyle(fontSize: 12),
         ),
       ),
@@ -136,7 +136,7 @@ class WeatherWiseApp extends ConsumerWidget {
       ),
       navigationBarTheme: NavigationBarThemeData(
         indicatorColor: Colors.blue.shade900,
-        labelTextStyle: MaterialStateProperty.all(
+        labelTextStyle: WidgetStateProperty.all(
           const TextStyle(fontSize: 12),
         ),
       ),

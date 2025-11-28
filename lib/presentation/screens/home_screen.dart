@@ -8,6 +8,7 @@ import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'forecast_screen.dart';
 
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,13 +17,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  String selectedCity = 'London';
+  String selectedCity = 'Colombo';
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final weatherAsync = ref.watch(currentWeatherProvider(selectedCity));
-    final forecastAsync = ref.watch(forecastProvider(selectedCity));
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) =>  SettingsScreen()),
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
           ),
@@ -56,7 +56,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(currentWeatherProvider(selectedCity));
-          ref.invalidate(forecastProvider(selectedCity));
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -100,9 +99,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                DateFormat('EEEE, MMMM d').format(
-                                  DateTime.now(),
-                                ),
+                                DateFormat(
+                                  'EEEE, MMMM d',
+                                ).format(DateTime.now()),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   color: Colors.white70,
@@ -126,7 +125,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   const SizedBox(width: 16),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${weather.main.temp.round()}°C',
@@ -151,12 +151,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                               const SizedBox(height: 24),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   _WeatherDetail(
                                     icon: Icons.thermostat,
                                     label: 'Feels Like',
-                                    value: '${weather.main.feelsLike.round()}°C',
+                                    value:
+                                        '${weather.main.feelsLike.round()}°C',
                                   ),
                                   _WeatherDetail(
                                     icon: Icons.water_drop,
@@ -166,7 +168,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   _WeatherDetail(
                                     icon: Icons.air,
                                     label: 'Wind',
-                                    value: '${weather.wind.speed} m/s',
+                                    value:
+                                        '${weather.wind.speed.toStringAsFixed(1)} m/s',
                                   ),
                                 ],
                               ),
@@ -191,7 +194,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               _DetailRow(
                                 icon: Icons.visibility,
                                 label: 'Visibility',
-                                value: '${(weather.visibility / 1000).toStringAsFixed(1)} km',
+                                value:
+                                    '${(weather.visibility / 1000).toStringAsFixed(1)} km',
                               ),
                               const Divider(),
                               _DetailRow(
@@ -217,116 +221,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ForecastScreen(cityName: selectedCity),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.calendar_month),
+                        label: const Text('View 5-Day Forecast'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                        ),
+                      ),
                     ],
                   ),
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: CircularProgressIndicator(),
+                  loading: () => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 100),
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading weather data for $selectedCity...',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
                     ),
                   ),
-                  error: (error, stack) => Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error loading weather data',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(error.toString()),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              ref.invalidate(currentWeatherProvider(selectedCity));
-                            },
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // 5-Day Forecast Section
-                Text(
-                  '5-Day Forecast',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 12),
-                forecastAsync.when(
-                  data: (forecast) => SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        final item = forecast.list[index * 8];
-                        final date = DateTime.parse(item.dtTxt);
-                        return Card(
-                          margin: const EdgeInsets.only(right: 12),
-                          child: Container(
-                            width: 120,
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
+                  error: (error, stack) {
+                    print('🔥 Error in UI: $error');
+                    return Card(
+                      color: Colors.red.shade50,
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error Loading Weather',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Colors.red.shade900,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error.toString().replaceAll('Exception:', ''),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.red.shade700),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '💡 Troubleshooting Tips:',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              '1. Check your internet connection\n'
+                              '2. Verify your API key is correct\n'
+                              '3. Make sure the city name is valid\n'
+                              '4. Try a different city (e.g., London, Paris)',
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  DateFormat('EEE').format(date),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    ref.invalidate(
+                                      currentWeatherProvider(selectedCity),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Retry'),
                                 ),
-                                const SizedBox(height: 8),
-                                Image.network(
-                                  'https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png',
-                                  width: 50,
-                                  height: 50,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${item.main.temp.round()}°C',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  item.weather[0].main,
-                                  style: const TextStyle(fontSize: 12),
-                                  textAlign: TextAlign.center,
+                                const SizedBox(width: 12),
+                                OutlinedButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedCity = 'London';
+                                    });
+                                    ref.invalidate(
+                                      currentWeatherProvider('London'),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.home),
+                                  label: const Text('Try London'),
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => const Text('Error loading forecast'),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ForecastScreen(cityName: selectedCity),
+                          ],
+                        ),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.calendar_month),
-                  label: const Text('View Detailed Forecast'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
                 ),
               ],
             ),
@@ -343,7 +345,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const FavoritesScreen()),
-            );
+            ).then((_) {
+              setState(() {
+                _selectedIndex = 0;
+              });
+            });
           }
         },
         destinations: const [
@@ -382,10 +388,7 @@ class _WeatherDetail extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
         ),
         const SizedBox(height: 4),
         Text(
@@ -420,17 +423,11 @@ class _DetailRow extends StatelessWidget {
         children: [
           Icon(icon, size: 24, color: Colors.blue),
           const SizedBox(width: 16),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(label, style: const TextStyle(fontSize: 16)),
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),

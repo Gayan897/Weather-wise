@@ -166,7 +166,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     return ListTile(
                                       leading: const Icon(Icons.favorite, color: Colors.red),
                                       title: Text(location.name),
-                                      subtitle: Text('${location.country}'),
+                                      subtitle: Text(location.country),
                                       onTap: () {
                                         _addToRecentSearches(location.name);
                                         Navigator.pop(context, location.name);

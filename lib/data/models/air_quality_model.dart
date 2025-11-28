@@ -1,12 +1,11 @@
-
 // lib/data/models/air_quality_model.dart
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weather_app/data/models/weather_model.dart';
+
 part 'air_quality_model.g.dart';
 
 @JsonSerializable()
 class AirQualityModel {
-  final Coord coord;
+  final AirQualityCoord coord;
   final List<AirQualityData> list;
 
   AirQualityModel({required this.coord, required this.list});
@@ -14,6 +13,18 @@ class AirQualityModel {
   factory AirQualityModel.fromJson(Map<String, dynamic> json) =>
       _$AirQualityModelFromJson(json);
   Map<String, dynamic> toJson() => _$AirQualityModelToJson(this);
+}
+
+@JsonSerializable()
+class AirQualityCoord {
+  final double lat;
+  final double lon;
+
+  AirQualityCoord({required this.lat, required this.lon});
+
+  factory AirQualityCoord.fromJson(Map<String, dynamic> json) =>
+      _$AirQualityCoordFromJson(json);
+  Map<String, dynamic> toJson() => _$AirQualityCoordToJson(this);
 }
 
 @JsonSerializable()
